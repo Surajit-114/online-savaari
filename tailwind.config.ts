@@ -21,6 +21,7 @@ const config = {
             colors: {
                 clr: {
                     red: "hsl(var(--clr-red))",
+                    dropdown: "hsl(var(--clr-dropdown-hover))",
                 },
 
                 border: "hsl(var(--border))",

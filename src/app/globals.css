@@ -4,7 +4,8 @@
 
 @layer base {
     :root {
-        --clr-red: 341 100% 48%;
+        --clr-red: 0 100% 50%;
+        --clr-dropdown-hover: 208 91% 61%;
 
         --background: 0 0% 100%;
         --foreground: 0 0% 3.9%;
@@ -68,4 +69,9 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+.toggle-height{
+    height: 0;
+    transition: all;
 }
