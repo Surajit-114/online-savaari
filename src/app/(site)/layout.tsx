@@ -1,4 +1,4 @@
-import { Container, Navbar } from "@/components";
+import { Navbar } from "@/components";
 import React, { type FC } from "react";
 
 interface Props {
@@ -7,12 +7,12 @@ interface Props {
 
 const SiteLayout: FC<Props> = ({ children }) => {
     return (
-        <>
+        <div className="relative">
             <Navbar />
             <main>
-                <Container>{children}</Container>
+                {children}
             </main>
-        </>
+        </div>
     );
 };
 

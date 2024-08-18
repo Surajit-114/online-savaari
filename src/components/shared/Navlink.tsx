@@ -20,7 +20,7 @@ const Navlink: FC<Props> = ({
   icon: Icon,
   ...props
 }) => {
-  const isActive = useMemo(() => pathname === href, [pathname, href]);
+  const isActive = useMemo(() => pathname.includes(href), [pathname, href]);
   return (
     <Link
       {...props}

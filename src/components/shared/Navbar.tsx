@@ -15,11 +15,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Navlink } from "@/components";
 
-
 const Navbar = () => {
   const pathname = usePathname();
   return (
-    <nav className="border-b py-2 shadow-md">
+    <nav className="sticky top-0 z-50 border-b bg-background py-2 shadow-md">
       <Container className="grid grid-cols-12 grid-rows-2 place-items-center gap-y-4 sm:grid-rows-1">
         {/* -------- LOGO ----------- */}
         <div className="col-start-1 col-end-5 row-start-1 row-end-1 h-auto w-auto sm:col-end-2">

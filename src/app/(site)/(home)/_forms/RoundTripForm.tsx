@@ -1,243 +1,384 @@
 "use client";
-import { oneWayFormAction } from "@/actions/flights/oneWayFormAction";
-import {
-  CheckboxItem,
-  Combobox,
-  Counter,
-  DatePicker,
-  RadioGroup,
-} from "@/components";
+import { useState, type FC } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import React, { useState } from "react";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { CitySearch, Counter, DatePicker } from "@/components";
 import { AiOutlineSwap } from "react-icons/ai";
 import { FaArrowRight, FaChevronDown } from "react-icons/fa6";
+import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  roundTripFormSchema,
+  TRoundTripFormSchema,
+} from "@/schemas/flight/roundTripFromSchema";
+import useFlightCodeList from "@/hooks/useFlightCodes";
 
-let options = [
-  {
-    label: "Delhi",
-    value: "DEL",
-  },
-  {
-    label: "Bangalore",
-    value: "BLR",
-  },
-  {
-    label: "Kolkata",
-    value: "CCU",
-  },
-];
+interface Props {}
 
-const classes = [
-  {
-    label: "economy",
-    value: "economy",
-  },
-  {
-    label: "premium economy",
-    value: "premium_economy",
-  },
-  {
-    label: "bussiness",
-    value: "bussiness",
-  },
-];
+const OneWayForm: FC<Props> = ({}) => {
+  const flightCodeList = useFlightCodeList(state => state.flightCodeList);
+  const [showTravellerSelection, setShowTravellerSelection] =
+    useState<boolean>(false);
+  const form = useForm<TRoundTripFormSchema>({
+    resolver: zodResolver(roundTripFormSchema),
+    defaultValues: {
+      fromCityOrAirport: "DEL",
+      toCityOrAirport: "BLR",
+      travelDate: new Date(),
+      returnDate: new Date(),
+      ADULT: 1,
+      CHILD: 0,
+      INFANT: 0,
+      cabinClass: "ECONOMY",
+      isDirectFlight: false,
+      special: null,
+    },
+  });
 
-const RoundTripForm = () => {
-  const [departFrom, setDepartFrom] = useState<string>("Delhi_DEL");
-  const [goingTo, setGoingTo] = useState<string>("Bangalore_BLR");
-  const [adult, setAdult] = useState<number>(1);
-  const [infant, setInfant] = useState<number>(0);
-  const [child, setChild] = useState<number>(0);
-  const [travelClass, setTravelClass] = useState<string>("economy");
-  const [nonStop, setNonStop] = useState<boolean>(false);
-  const [student, setStudent] = useState<boolean>(false);
-  const [senior, setSenior] = useState<boolean>(false);
-  const [armed, setArmed] = useState<boolean>(false);
-  const [toggleTravel, setToggleTravel] = useState<boolean>(true);
-
-  function handleSwap() {
-    let temp = goingTo;
-    setGoingTo(departFrom);
-    setDepartFrom(temp);
+  function onSubmit(values: TRoundTripFormSchema) {
+    console.log(values);
   }
 
+  function handleSwapCity() {
+    const fromCityOrAirport = form.getValues("fromCityOrAirport");
+    const toCityOrAirport = form.getValues("toCityOrAirport");
+    const temp = fromCityOrAirport;
+    form.setValue("fromCityOrAirport", toCityOrAirport);
+    form.setValue("toCityOrAirport", temp);
+  }
   return (
-    <form action={oneWayFormAction} className="mt-8">
-      <ScrollArea className="h-[calc(100vh-17rem)]">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
+        {/* -------- AIRPORT SELECTION -------- */}
+        <div className="grid grid-cols-10 gap-2">
+          <FormField
+            control={form.control}
+            name="fromCityOrAirport"
+            render={({ field }) => (
+              <FormItem className="col-span-4">
+                <FormLabel>Depart from</FormLabel>
+                <FormControl>
+                  <CitySearch
+                    options={flightCodeList}
+                    setValue={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <p className="text-xs font-medium capitalize text-primary/70">
+                  {
+                    flightCodeList.find((option) => option.code === field.value)
+                      ?.name
+                  }
+                </p>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="button"
+            className="col-span-2 self-center text-xl"
+            variant="ghost"
+            onClick={handleSwapCity}
+          >
+            <AiOutlineSwap />
+          </Button>
+          <FormField
+            control={form.control}
+            name="toCityOrAirport"
+            render={({ field }) => (
+              <FormItem className="col-span-4">
+                <FormLabel>Going To</FormLabel>
+                <FormControl>
+                  <CitySearch
+                    options={flightCodeList}
+                    setValue={field.onChange}
+                    value={field.value}
+                  />
+                </FormControl>
+                <p className="text-xs font-medium capitalize text-primary/70">
+                  {
+                    flightCodeList.find((option) => option.code === field.value)
+                      ?.name
+                  }
+                </p>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        {/* -------- DATE SELECTION -------- */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="travelDate"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Departure date</FormLabel>
+                <FormControl>
+                  <DatePicker setValue={field.onChange} value={field.value} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="returnDate"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Return date</FormLabel>
+                <FormControl>
+                  <DatePicker setValue={field.onChange} value={field.value} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        {/* -------- TRAVELLER SELECTION -------- */}
         <div className="space-y-4">
-          {/* -------- AIRPORT SELECTION -------- */}
-          <div className="grid grid-cols-9 gap-x-1">
-            <div className="col-span-4 inline-flex flex-col gap-y-2">
-              <Label className="text-xs capitalize text-primary/60">
-                Depart from
-              </Label>
-              <Combobox
-                options={options}
-                name="depart_from"
-                value={departFrom}
-                setValue={setDepartFrom}
-                notAllowed={goingTo}
-              />
-              <p className="text-sm font-semibold capitalize text-primary/70">
-                {departFrom.split("_")[0] ?? ""}
-              </p>
-            </div>
+          <div className="flex flex-col gap-y-2">
+            <FormLabel>Traveller(s), class</FormLabel>
             <Button
               type="button"
-              className="col-span-1 w-full self-center text-4xl"
-              variant="ghost"
-              onClick={handleSwap}
+              variant="outline"
+              onClick={() => setShowTravellerSelection((prev) => !prev)}
+              className="justify-between text-primary/80"
             >
-              <AiOutlineSwap />
-            </Button>
-            <div className="col-span-4 inline-flex flex-col gap-y-2">
-              <Label className="text-xs capitalize text-primary/60">
-                Going to
-              </Label>
-              <Combobox
-                options={options}
-                name="going_to"
-                value={goingTo}
-                setValue={setGoingTo}
-                notAllowed={departFrom}
-              />
-              <p className="text-sm font-semibold capitalize text-primary/70">
-                {goingTo.split("_")[0] ?? ""}
-              </p>
-            </div>
-          </div>
-          {/* -------- DATE SELECTION -------- */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col gap-y-2">
-              <Label className="col-span-1 text-xs capitalize text-primary/60">
-                Departure date
-              </Label>
-              <DatePicker name="departure_date" />
-            </div>
-            <div className="col-span-1 flex flex-col gap-y-2">
-              <Label className="text-xs capitalize text-primary/60">
-                Return date
-              </Label>
-              <DatePicker name="return_date" />
-            </div>
-          </div>
-          {/* -------- TRAVELLER SELECTION -------- */}
-          <div>
-            <Label className="text-xs text-primary/60">
-              Traveller(s), class
-            </Label>
-            <div className="flex items-center justify-between mb-4">
               <p className="text-lg capitalize">
-                {adult + child + infant} traveller,{" "}
-                {travelClass.replace("_", " ")}
+                {form.getValues("ADULT") +
+                  form.getValues("CHILD") +
+                  form.getValues("INFANT")}{" "}
+                traveller,{" "}
+                {form.getValues("cabinClass").replace("_", " ").toLowerCase()}
               </p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setToggleTravel((prev) => !prev)}
-              >
-                <FaChevronDown />
-              </Button>
-            </div>
-            <div
-              className={cn(
-                "overflow-hidden transition-all duration-300 ease-in-out",
-                toggleTravel ? "h-0" : "h-44",
-              )}
-            >
-              <div className="grid grid-cols-3 gap-x-4">
-                <span className="col-span-1 space-y-2">
-                  <Label className="text-xs capitalize text-primary/90">
-                    Adult
-                  </Label>
-                  <Counter
-                    value={adult}
-                    setValue={setAdult}
-                    min={1}
-                    max={10}
-                    name="adult"
-                  />
-                </span>
-                <span className="col-span-1 space-y-2">
-                  <Label className="text-xs capitalize text-primary/90">
-                    Child [2-12 YRS]
-                  </Label>
-                  <Counter
-                    value={child}
-                    setValue={setChild}
-                    min={0}
-                    max={10}
-                    name="child"
-                  />
-                </span>
-                <span className="col-span-1 space-y-2">
-                  <Label className="text-xs capitalize text-primary/90">
-                    Infant [Below 2 YRS]
-                  </Label>
-                  <Counter
-                    value={infant}
-                    setValue={setInfant}
-                    min={0}
-                    max={10}
-                    name="infant"
-                  />
-                </span>
-              </div>
-              {/* -------- CLASS SELECTION -------- */}
-              <div className="mt-3">
-                <RadioGroup
-                  options={classes}
-                  name="class"
-                  defaultValue="economy"
-                  value={travelClass}
-                  setValue={setTravelClass}
-                />
-              </div>
-            </div>
+              <FaChevronDown />
+            </Button>
           </div>
-
-          {/* -------- TYPE SELECTION -------- */}
-          <div className="space-y-4">
-            <CheckboxItem
-              label="non stop flights"
-              checked={nonStop}
-              setChecked={setNonStop}
-              name="non_stop"
-            />
-            <CheckboxItem
-              label="student fares"
-              checked={student}
-              setChecked={setStudent}
-              name="student_fares"
-            />
-            <CheckboxItem
-              label="senior citizen"
-              checked={senior}
-              setChecked={setSenior}
-              name="senior_citizen"
-            />
-            <CheckboxItem
-              label="armed forces"
-              checked={armed}
-              setChecked={setArmed}
-              name="armed_forces"
-            />
-          </div>
-          <Button
-            variant="destructive"
-            className="float-right gap-2"
-            type="submit"
+          {/* -------- TRAVELLER SELECTION BUTTONS -------- */}
+          <div
+            className={cn(
+              "grid grid-cols-3 gap-4 overflow-y-scroll transition-all duration-300 ease-in-out",
+              !showTravellerSelection ? "h-0" : "h-40",
+            )}
           >
+            <FormField
+              control={form.control}
+              name="ADULT"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Adult</FormLabel>
+                  <FormControl>
+                    <Counter
+                      value={field.value}
+                      setValue={field.onChange}
+                      min={1}
+                      max={10}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="CHILD"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Child</FormLabel>
+                  <FormControl>
+                    <Counter
+                      value={field.value}
+                      setValue={field.onChange}
+                      min={0}
+                      max={10}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="INFANT"
+              render={({ field }) => (
+                <FormItem className="col-span-1">
+                  <FormLabel>Infant</FormLabel>
+                  <FormControl>
+                    <Counter
+                      value={field.value}
+                      setValue={field.onChange}
+                      min={0}
+                      max={10}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* -------- CABIN CLASS SELECTION -------- */}
+            <FormField
+              control={form.control}
+              name="cabinClass"
+              render={({ field }) => (
+                <FormItem className="col-span-3">
+                  <FormLabel>Cabin Class</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex flex-col space-y-1"
+                    >
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem
+                            value="ECONOMY"
+                            className="border-clr-red/80 [&_svg]:fill-clr-red/80 [&_svg]:text-clr-red/80"
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">Economy</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem
+                            value="PREMIUM_ECONOMY"
+                            className="border-clr-red/80 [&_svg]:fill-clr-red/80 [&_svg]:text-clr-red/80"
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Premium Economy
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem
+                            value="PREMIUM"
+                            className="border-clr-red/80 [&_svg]:fill-clr-red/80 [&_svg]:text-clr-red/80"
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">Premium</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          {/* -------- SPECIAL CLASS SELECTION -------- */}
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="isDirectFlight"
+              render={({ field }) => (
+                <FormItem className="flex items-end gap-2 font-normal">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="border-clr-red/80 data-[state=checked]:bg-clr-red/80 data-[state=checked]:text-background"
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">
+                    Non Stop Flights
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="special"
+              render={() => (
+                <FormItem className="flex items-end gap-2">
+                  <FormControl>
+                    <Checkbox
+                      value="STUDENT"
+                      checked={form.getValues("special") === "STUDENT"}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          form.setValue("special", "STUDENT");
+                        } else {
+                          form.setValue("special", null);
+                        }
+                      }}
+                      className="border-clr-red/80 data-[state=checked]:bg-clr-red/80 data-[state=checked]:text-background"
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">Student Fares</FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="special"
+              render={() => (
+                <FormItem className="flex items-end gap-2">
+                  <FormControl>
+                    <Checkbox
+                      value="MIL"
+                      checked={form.getValues("special") === "MIL"}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          form.setValue("special", "MIL");
+                        } else {
+                          form.setValue("special", null);
+                        }
+                      }}
+                      className="border-clr-red/80 data-[state=checked]:bg-clr-red/80 data-[state=checked]:text-background"
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">Armed Forces</FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="special"
+              render={() => (
+                <FormItem className="flex items-end gap-2">
+                  <FormControl>
+                    <Checkbox
+                      value="SENIOR_CITIZEN"
+                      checked={form.getValues("special") === "SENIOR_CITIZEN"}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          form.setValue("special", "SENIOR_CITIZEN");
+                        } else {
+                          form.setValue("special", null);
+                        }
+                      }}
+                      className="border-clr-red/80 data-[state=checked]:bg-clr-red/80 data-[state=checked]:text-background"
+                    />
+                  </FormControl>
+                  <FormLabel className="font-normal">Senior Citizen</FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className="text-right">
+          <Button type="submit" variant="destructive" className="gap-x-3">
             Search Flights <FaArrowRight />
           </Button>
         </div>
-      </ScrollArea>
-    </form>
+      </form>
+    </Form>
   );
 };
 
-export default RoundTripForm;
+export default OneWayForm;
