@@ -21,12 +21,12 @@ import {
   roundTripFormSchema,
   TRoundTripFormSchema,
 } from "@/schemas/flight/roundTripFromSchema";
-import useFlightCodeList from "@/hooks/useFlightCodes";
+import useFlightCodes from "@/hooks/useFlightCodes";
 
 interface Props {}
 
 const OneWayForm: FC<Props> = ({}) => {
-  const flightCodeList = useFlightCodeList(state => state.flightCodeList);
+  const flightCodes = useFlightCodes((state) => state.flightCodes);
   const [showTravellerSelection, setShowTravellerSelection] =
     useState<boolean>(false);
   const form = useForm<TRoundTripFormSchema>({
@@ -58,7 +58,7 @@ const OneWayForm: FC<Props> = ({}) => {
   }
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-5">
         {/* -------- AIRPORT SELECTION -------- */}
         <div className="grid grid-cols-10 gap-2">
           <FormField
@@ -69,14 +69,14 @@ const OneWayForm: FC<Props> = ({}) => {
                 <FormLabel>Depart from</FormLabel>
                 <FormControl>
                   <CitySearch
-                    options={flightCodeList}
+                    options={flightCodes}
                     setValue={field.onChange}
                     value={field.value}
                   />
                 </FormControl>
                 <p className="text-xs font-medium capitalize text-primary/70">
                   {
-                    flightCodeList.find((option) => option.code === field.value)
+                    flightCodes.find((option) => option.code === field.value)
                       ?.name
                   }
                 </p>
@@ -100,14 +100,14 @@ const OneWayForm: FC<Props> = ({}) => {
                 <FormLabel>Going To</FormLabel>
                 <FormControl>
                   <CitySearch
-                    options={flightCodeList}
+                    options={flightCodes}
                     setValue={field.onChange}
                     value={field.value}
                   />
                 </FormControl>
                 <p className="text-xs font-medium capitalize text-primary/70">
                   {
-                    flightCodeList.find((option) => option.code === field.value)
+                    flightCodes.find((option) => option.code === field.value)
                       ?.name
                   }
                 </p>
@@ -373,7 +373,10 @@ const OneWayForm: FC<Props> = ({}) => {
 
         <div className="text-right">
           <Button type="submit" variant="destructive" className="gap-x-3">
-            Search Flights <FaArrowRight />
+            <span>Search Flights</span>
+            <span>
+              <FaArrowRight />
+            </span>
           </Button>
         </div>
       </form>

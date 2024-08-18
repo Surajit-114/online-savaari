@@ -30,7 +30,7 @@ const apiClient = async <T>({
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      throw new Error(error.message);
+      throw new Error(error.response?.data.message);
     } else {
       throw new Error("An unknown error occurred");
     }

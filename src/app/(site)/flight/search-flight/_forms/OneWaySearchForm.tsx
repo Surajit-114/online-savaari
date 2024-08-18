@@ -22,12 +22,17 @@ import { FaArrowRight } from "react-icons/fa6";
 import { FC } from "react";
 import useFlightCodes from "@/hooks/useFlightCodes";
 import useFlightSearch from "@/hooks/useFlightSearch";
+import useReactQuery from "@/hooks/useReactQuery";
+import { useRouter } from "next/navigation";
+import { ImSpinner8 } from "react-icons/im";
 
 interface Props {}
 
-const OneWaySearchForm:FC<Props> = ({}) => {
-  const flightCodes = useFlightCodes(state => state.flightCodes);
+const OneWaySearchForm: FC<Props> = ({}) => {
+  const flightCodes = useFlightCodes((state) => state.flightCodes);
   const flightSearch = useFlightSearch();
+  const { useAppMutation } = useReactQuery();
+  const router = useRouter();
   const form = useForm<TOneWayFormSchema>({
     resolver: zodResolver(oneWayFormSchema),
     defaultValues: {
@@ -42,8 +47,55 @@ const OneWaySearchForm:FC<Props> = ({}) => {
       special: flightSearch.query.special,
     },
   });
+  const mutation = useAppMutation({
+    url: "/flight/tripjack-flight-search/",
+    mutationKey: "flightSearch",
+  });
+
   function onSubmit(values: TOneWayFormSchema) {
-    console.log(values.travelDate.toLocaleDateString());
+    flightSearch.setIsLoading(true);
+    const searchQuery = {
+      special: values.special,
+      cabinClass: values.cabinClass,
+      paxInfo: {
+        ADULT: values.ADULT,
+        CHILD: values.CHILD,
+        INFANT: values.INFANT,
+      },
+      searchModifiers: {
+        pft: null,
+        isDirectFlight: values.isDirectFlight,
+      },
+      routeInfos: [
+        {
+          fromCityOrAirport: {
+            code: values.fromCityOrAirport,
+          },
+          toCityOrAirport: {
+            code: values.toCityOrAirport,
+          },
+          travelDate: values.travelDate.toLocaleDateString(),
+        },
+      ],
+      preferredAirline: null,
+    };
+    mutation.mutate(
+      { searchQuery },
+      {
+        onSuccess(data: any) {
+          flightSearch.setSearchResult(
+            data.tripjack.searchResult.tripInfos.ONWARD,
+          );
+          router.push("/flight/search-flight");
+        },
+        onError(error) {
+          console.log(error);
+        },
+        onSettled() {
+          flightSearch.setIsLoading(false);
+        },
+      },
+    );
   }
   function handleSwapCity() {
     const fromCityOrAirport = form.getValues("fromCityOrAirport");
@@ -58,7 +110,7 @@ const OneWaySearchForm:FC<Props> = ({}) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-3 gap-4 p-4 text-background"
       >
-        <div className="col-span-1 h-16 grid grid-cols-10 gap-2">
+        <div className="col-span-1 grid h-16 grid-cols-10 gap-2">
           <FormField
             control={form.control}
             name="fromCityOrAirport"
@@ -78,7 +130,7 @@ const OneWaySearchForm:FC<Props> = ({}) => {
           />
           <Button
             type="button"
-            className="col-span-2 text-xl self-end"
+            className="col-span-2 self-end text-xl"
             onClick={handleSwapCity}
           >
             <AiOutlineSwap />
@@ -186,7 +238,10 @@ const OneWaySearchForm:FC<Props> = ({}) => {
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem value="ECONOMY" className="[&_svg]:fill-background [&_svg]:text-background"/>
+                      <RadioGroupItem
+                        value="ECONOMY"
+                        className="[&_svg]:fill-background [&_svg]:text-background"
+                      />
                     </FormControl>
                     <FormLabel className="font-normal">Economy</FormLabel>
                   </FormItem>
@@ -297,9 +352,25 @@ const OneWaySearchForm:FC<Props> = ({}) => {
             )}
           />
         </div>
-        <Button type="submit" variant="destructive" className="gap-x-3">
-            Search Flights <FaArrowRight />
+        <div className="col-span-1">
+          <Button
+            type="submit"
+            variant="destructive"
+            className="w-full gap-x-3"
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? (
+              <ImSpinner8 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                <span>Search Flights</span>{" "}
+                <span>
+                  <FaArrowRight />
+                </span>
+              </>
+            )}
           </Button>
+        </div>
       </form>
     </Form>
   );

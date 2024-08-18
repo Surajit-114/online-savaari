@@ -1,40 +1,69 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { convertMinutesToHours } from "@/lib/utils";
-import { SI } from "@/types/flight";
+import { cn, convertMinutesToHours } from "@/lib/utils";
+import { SI, TotalPriceList } from "@/types/flight";
 import { type FC } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { FaIndianRupeeSign } from "react-icons/fa6";
 
 interface Props {
   sI: SI;
+  totalPriceList: TotalPriceList;
 }
 
 interface Details {
-  p1: string;
-  p2: string;
+  p1: string | number;
+  p2?: string | number;
+  className?: string;
 }
 
-const Details: FC<Details> = ({ p1, p2 }) => {
+const Details: FC<Details> = ({ p1, p2, className }) => {
   return (
-    <div>
+    <div className={cn(className)}>
       <p className="text-sm font-semibold text-primary">{p1}</p>
       <p className="text-xs font-normal text-primary/70">{p2}</p>
     </div>
   );
 };
 
-const FlightCard: FC<Props> = ({ sI }) => {
+const FlightCard: FC<Props> = ({ sI, totalPriceList }) => {
+  // console.log(totalPriceList)
   return (
-      <div className="flex items-center justify-between p-4 shadow-md rounded-md bg-background mb-4">
-        <div className="flex items-center gap-x-2">
-        <Image src={`https://www.onlinesavaari.com/static/flight/airline_logo/${sI.fD.aI.code}.png`} width={50} height={50} alt={sI.fD.aI.code} className="inline-block aspect-square w-8 h-auto rounded-full"/>
+    <div className="mb-4 grid grid-cols-12 gap-x-3 rounded bg-background p-4 shadow">
+      <div className="col-span-2 flex items-center gap-x-2">
+        <Image
+          src={`https://www.onlinesavaari.com/static/flight/airline_logo/${sI.fD.aI.code}.png`}
+          width={50}
+          height={50}
+          alt={sI.fD.aI.code}
+          className="inline-block aspect-square h-auto w-8 rounded-full"
+        />
         <Details p1={sI.fD.aI.name} p2={`${sI.fD.aI.code}-${sI.fD.fN}`} />
-        </div>
-        <Details p1={new Date(sI.dt).toDateString()} p2={sI.da.name} />
-        <Details p1={new Date(sI.at).toDateString()} p2={sI.aa.name} />
-        <Details p1={convertMinutesToHours(sI.duration)} p2={`${sI.stops} Stop`} />
-        <Button variant="destructive">View Fares</Button>
       </div>
+      <Details
+        p1={new Date(sI.dt).toDateString()}
+        p2={sI.da.name}
+        className="col-span-3"
+      />
+      <Details
+        p1={new Date(sI.at).toDateString()}
+        p2={sI.aa.name}
+        className="col-span-3"
+      />
+      <Details
+        p1={convertMinutesToHours(sI.duration)}
+        p2={`${sI.stops} Stop`}
+        className="col-span-1"
+      />
+      <div className="col-span-2 inline-flex items-center">
+        <span>
+          <FaIndianRupeeSign className="h-3 w-3" />
+        </span>
+        <Details p1={totalPriceList.fd.ADULT.fC.TF} />
+      </div>
+      <Button variant="destructive" className="col-span-1">
+        View Fares
+      </Button>
+    </div>
   );
 };
 

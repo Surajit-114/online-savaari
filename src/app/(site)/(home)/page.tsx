@@ -8,6 +8,7 @@ import OneWayForm from "./_forms/OneWayForm";
 import { Container } from "@/components";
 import ClientWrapper from "./_components/ClientWrapper";
 
+
 const Home = async () => {
   const flightCodes = await getFlightCodeList();
   return (

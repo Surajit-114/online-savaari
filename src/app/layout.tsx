@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/providers/QueryProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const rubik = Rubik({ subsets: ["latin"] });
 
@@ -18,7 +19,10 @@ export default function RootLayout({
   return (
     <QueryProvider>
       <html lang="en">
-        <body className={rubik.className}>{children}</body>
+        <body className={rubik.className}>
+          {children}
+          <Toaster richColors position="top-center"/>
+        </body>
       </html>
     </QueryProvider>
   );

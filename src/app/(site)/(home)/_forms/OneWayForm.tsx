@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import useFlightCodes from "@/hooks/useFlightCodes";
 import useFlightSearch from "@/hooks/useFlightSearch";
 import useReactQuery from "@/hooks/useReactQuery";
+import { toast } from "sonner";
 
 interface Props {}
 
@@ -82,10 +83,12 @@ const OneWayForm: FC<Props> = ({}) => {
       ],
       preferredAirline: null,
     };
-    mutation.mutate(
+
+    mutation.mutateAsync(
       { searchQuery },
       {
         onSuccess(data: any) {
+          
           const payload = {
             ...values,
             searchType: "oneWay",
@@ -94,10 +97,11 @@ const OneWayForm: FC<Props> = ({}) => {
           flightSearch.setSearchResult(
             data.tripjack.searchResult.tripInfos.ONWARD,
           );
+          toast.success("Search successful")
           router.push("/flight/search-flight");
         },
         onError(error) {
-          console.log(error);
+          toast.error(error.message)
         },
       },
     );
@@ -112,7 +116,7 @@ const OneWayForm: FC<Props> = ({}) => {
   }
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-5">
         {/* -------- AIRPORT SELECTION -------- */}
         <div className="grid grid-cols-10 gap-2">
           <FormField
@@ -421,7 +425,10 @@ const OneWayForm: FC<Props> = ({}) => {
               <ImSpinner8 className="h-5 w-5 animate-spin" />
             ) : (
               <>
-                Search Flights <FaArrowRight />
+                <span>Search Flights</span>{" "}
+                <span>
+                  <FaArrowRight />
+                </span>
               </>
             )}
           </Button>

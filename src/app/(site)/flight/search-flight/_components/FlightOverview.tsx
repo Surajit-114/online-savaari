@@ -9,11 +9,12 @@ interface Props {
 }
 
 const FlightOverview: FC<Props> = ({sI, totalPriceList}) => {
+  
   return (
     <div>
       {
         sI.map((item)=>(
-          <FlightCard sI={item} key={item.id}/>
+          <FlightCard sI={item} key={item.id} totalPriceList={totalPriceList[0]}/>
         ))
       }
      

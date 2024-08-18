@@ -20,6 +20,8 @@ export type TSearchresult = {
 }
 
 interface FlightSearchStore {
+  isLoading:boolean;
+  setIsLoading:(isLoading:boolean)=> void;
   query: TFlightSearch;
   setQuery: (query: TFlightSearch) => void;
   searchResult: TSearchresult[];
@@ -27,6 +29,8 @@ interface FlightSearchStore {
 }
 
 const useFlightSearch = create<FlightSearchStore>((set) => ({
+  isLoading:false,
+  setIsLoading:(isLoading:boolean) => set({isLoading}),
   query: {
     searchType: "oneWay",
     fromCityOrAirport: "DEL",

@@ -1,8 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-        domains: ['www.onlinesavaari.com'], // Add your image source hostname here
-      },
-};
+        remotePatterns:[
+          {
+            protocol: 'https',
+            hostname: 'www.onlinesavaari.com',
+            port: '',
+            pathname: '/static/**',
+          },
+        // Add your image source hostname here
+      ]
+}
+}
 
 export default nextConfig;
