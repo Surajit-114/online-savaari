@@ -3,14 +3,14 @@ import RoundTripForm from "./_forms/RoundTripForm";
 import DomesticRoutesCarousel from "./_components/DomesticRoutesCarousel";
 import InternationalRoutesCarousel from "./_components/InternationalRoutesCarousel";
 import Details from "./_components/Details";
-import getFlightCodeList from "@/actions/flights/getFlightCodeList";
 import OneWayForm from "./_forms/OneWayForm";
 import { Container } from "@/components";
 import ClientWrapper from "./_components/ClientWrapper";
+import { getCodes } from "@/actions/flights/codes/getCodes";
 
 
 const Home = async () => {
-  const flightCodes = await getFlightCodeList();
+  const flightCodes = await getCodes();
   return (
     <ClientWrapper flightCodes={flightCodes}>
       <Container>

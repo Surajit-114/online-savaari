@@ -3,7 +3,6 @@ export type TAuth = {
   account_email: string;
   role: string;
   access_token: string;
-  refresh_token: string;
 };
 
 interface AuthStore {
@@ -16,7 +15,6 @@ const useAuth = create<AuthStore>((set) => ({
     account_email: "",
     role: "",
     access_token: "",
-    refresh_token: "",
   },
   setAuth: (auth: TAuth) => set({ auth }),
 }));

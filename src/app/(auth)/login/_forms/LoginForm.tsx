@@ -1,5 +1,4 @@
 "use client";
-import handleLogin from "@/actions/auth/handleLogin";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -10,7 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import useAuth from "@/hooks/useAuth";
+import useAuth from "@/hooks/auth/useAuth";
 import useReactQuery from "@/hooks/useReactQuery";
 import {
   loginFormSchema,
@@ -19,17 +18,15 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FC } from "react";
 import { useForm } from "react-hook-form";
 import { ImSpinner8 } from "react-icons/im";
 import { toast } from "sonner";
+import { setCookie } from "@/lib/authCookies";
 
-interface Props {}
-
-const LoginForm: FC<Props> = ({}) => {
-  const router = useRouter()
+const LoginForm = () => {
+  const router = useRouter();
   const { setAuth } = useAuth();
-  const { useAppMutation } = useReactQuery();
+  const { usePublicMutation } = useReactQuery();
   const form = useForm<TLoginFormSchema>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -37,27 +34,26 @@ const LoginForm: FC<Props> = ({}) => {
       password: "",
     },
   });
-  const mutation = useAppMutation({
+  const mutation = usePublicMutation({
     url: "/accounts/login/",
     mutationKey: "login",
   });
   async function onSubmit(values: TLoginFormSchema) {
-    const loginPayload = {
+    const loginData = {
       account_email: values.username,
       account_password: values.password,
     };
-    mutation.mutate(loginPayload, {
+    mutation.mutate(loginData, {
       async onSuccess(data: any) {
         const payload = {
           account_email: data.account_email,
           role: data.role,
           access_token: data.access,
-          refresh_token: data.refresh,
         };
-        await handleLogin(payload);
+        setCookie({ name: "refresh_token", value: data.refresh });
         setAuth(payload);
-        router.push("/")
         toast.success("Login successfull");
+        router.push("/");
       },
       onError(error) {
         toast.error(error.message);

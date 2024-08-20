@@ -1,5 +1,5 @@
 "use client";
-import useFlightCodes, { TFlightCode } from "@/hooks/useFlightCodes";
+import useFlightCodes, { TFlightCode } from "@/hooks/flight/useFlightCodes";
 import { useEffect, type FC } from "react";
 
 interface Props {

@@ -21,7 +21,7 @@ import {
   roundTripFormSchema,
   TRoundTripFormSchema,
 } from "@/schemas/flight/roundTripFromSchema";
-import useFlightCodes from "@/hooks/useFlightCodes";
+import useFlightCodes from "@/hooks/flight/useFlightCodes";
 
 interface Props {}
 

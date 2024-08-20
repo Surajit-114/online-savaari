@@ -23,17 +23,15 @@ import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
-import useFlightCodes from "@/hooks/useFlightCodes";
-import useFlightSearch from "@/hooks/useFlightSearch";
-import useReactQuery from "@/hooks/useReactQuery";
+import useFlightCodes from "@/hooks/flight/useFlightCodes";
+import useFlightSearch from "@/hooks/flight/useFlightSearch";
 import { toast } from "sonner";
 
 interface Props {}
 
 const OneWayForm: FC<Props> = ({}) => {
-  const flightCodes = useFlightCodes((state) => state.flightCodes);
-  const flightSearch = useFlightSearch();
-  const { useAppMutation } = useReactQuery();
+  const {flightCodes} = useFlightCodes();
+  const {setQuery} = useFlightSearch();
   const router = useRouter();
   const [showTravellerSelection, setShowTravellerSelection] =
     useState<boolean>(false);
@@ -52,59 +50,13 @@ const OneWayForm: FC<Props> = ({}) => {
     },
   });
 
-  const mutation = useAppMutation({
-    url: "/flight/tripjack-flight-search/",
-    mutationKey: "flightSearch",
-  });
-
   async function onSubmit(values: TOneWayFormSchema) {
-    const searchQuery = {
-      special: values.special,
-      cabinClass: values.cabinClass,
-      paxInfo: {
-        ADULT: values.ADULT,
-        CHILD: values.CHILD,
-        INFANT: values.INFANT,
-      },
-      searchModifiers: {
-        pft: null,
-        isDirectFlight: values.isDirectFlight,
-      },
-      routeInfos: [
-        {
-          fromCityOrAirport: {
-            code: values.fromCityOrAirport,
-          },
-          toCityOrAirport: {
-            code: values.toCityOrAirport,
-          },
-          travelDate: values.travelDate.toLocaleDateString(),
-        },
-      ],
-      preferredAirline: null,
+    const payload = {
+      ...values,
+      searchType: "oneWay",
     };
-
-    mutation.mutateAsync(
-      { searchQuery },
-      {
-        onSuccess(data: any) {
-          
-          const payload = {
-            ...values,
-            searchType: "oneWay",
-          };
-          flightSearch.setQuery(payload);
-          flightSearch.setSearchResult(
-            data.tripjack.searchResult.tripInfos.ONWARD,
-          );
-          toast.success("Search successful")
-          router.push("/flight/search-flight");
-        },
-        onError(error) {
-          toast.error(error.message)
-        },
-      },
-    );
+    setQuery(payload);
+    router.push("/flight/flight-search");
   }
 
   function handleSwapCity() {
@@ -419,9 +371,9 @@ const OneWayForm: FC<Props> = ({}) => {
             type="submit"
             variant="destructive"
             className="gap-x-3"
-            disabled={mutation.isPending}
+            disabled={form.formState.isSubmitting}
           >
-            {mutation.isPending ? (
+            {form.formState.isSubmitting ? (
               <ImSpinner8 className="h-5 w-5 animate-spin" />
             ) : (
               <>

@@ -20,19 +20,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FaArrowRight } from "react-icons/fa6";
 import { FC } from "react";
-import useFlightCodes from "@/hooks/useFlightCodes";
-import useFlightSearch from "@/hooks/useFlightSearch";
+import useFlightCodes from "@/hooks/flight/useFlightCodes";
+import useFlightSearch from "@/hooks/flight/useFlightSearch";
 import useReactQuery from "@/hooks/useReactQuery";
-import { useRouter } from "next/navigation";
 import { ImSpinner8 } from "react-icons/im";
+import { toast } from "sonner";
 
 interface Props {}
 
 const OneWaySearchForm: FC<Props> = ({}) => {
   const flightCodes = useFlightCodes((state) => state.flightCodes);
   const flightSearch = useFlightSearch();
-  const { useAppMutation } = useReactQuery();
-  const router = useRouter();
+  const { usePublicMutation } = useReactQuery();
   const form = useForm<TOneWayFormSchema>({
     resolver: zodResolver(oneWayFormSchema),
     defaultValues: {
@@ -47,12 +46,12 @@ const OneWaySearchForm: FC<Props> = ({}) => {
       special: flightSearch.query.special,
     },
   });
-  const mutation = useAppMutation({
+  const mutation = usePublicMutation({
     url: "/flight/tripjack-flight-search/",
     mutationKey: "flightSearch",
   });
 
-  function onSubmit(values: TOneWayFormSchema) {
+  async function onSubmit(values: TOneWayFormSchema) {
     flightSearch.setIsLoading(true);
     const searchQuery = {
       special: values.special,
@@ -86,10 +85,9 @@ const OneWaySearchForm: FC<Props> = ({}) => {
           flightSearch.setSearchResult(
             data.tripjack.searchResult.tripInfos.ONWARD,
           );
-          router.push("/flight/search-flight");
         },
         onError(error) {
-          console.log(error);
+          toast.error(error.message);
         },
         onSettled() {
           flightSearch.setIsLoading(false);
@@ -110,7 +108,7 @@ const OneWaySearchForm: FC<Props> = ({}) => {
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-3 gap-4 p-4 text-background"
       >
-        <div className="col-span-1 grid h-16 grid-cols-10 gap-2">
+        <div className="col-span-3 md:col-span-1 grid h-16 grid-cols-10 gap-2">
           <FormField
             control={form.control}
             name="fromCityOrAirport"
@@ -157,7 +155,7 @@ const OneWaySearchForm: FC<Props> = ({}) => {
           control={form.control}
           name="travelDate"
           render={({ field }) => (
-            <FormItem className="col-span-1">
+            <FormItem className="col-span-3 md:col-span-1">
               <FormLabel>Departure date</FormLabel>
               <FormControl>
                 <DatePicker setValue={field.onChange} value={field.value} />
@@ -166,7 +164,7 @@ const OneWaySearchForm: FC<Props> = ({}) => {
             </FormItem>
           )}
         />
-        <div className="col-span-1 space-y-2">
+        <div className="col-span-3 md:col-span-1 space-y-2">
           <FormLabel>Traveller(s)</FormLabel>
           <div className="grid grid-cols-3 gap-x-3">
             <FormField
@@ -229,7 +227,7 @@ const OneWaySearchForm: FC<Props> = ({}) => {
           control={form.control}
           name="cabinClass"
           render={({ field }) => (
-            <FormItem className="col-span-1">
+            <FormItem className="col-span-3 md:col-span-1">
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
@@ -265,7 +263,7 @@ const OneWaySearchForm: FC<Props> = ({}) => {
             </FormItem>
           )}
         />
-        <div className="col-span-1 space-y-2">
+        <div className="col-span-3 md:col-span-1 space-y-2">
           <FormField
             control={form.control}
             name="isDirectFlight"
@@ -352,11 +350,11 @@ const OneWaySearchForm: FC<Props> = ({}) => {
             )}
           />
         </div>
-        <div className="col-span-1">
+        <div className="col-span-3 md:col-span-1">
           <Button
             type="submit"
             variant="destructive"
-            className="w-full gap-x-3"
+            className="w-full gap-x-3 text-base"
             disabled={mutation.isPending}
           >
             {mutation.isPending ? (

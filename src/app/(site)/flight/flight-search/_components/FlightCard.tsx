@@ -19,17 +19,16 @@ interface Details {
 const Details: FC<Details> = ({ p1, p2, className }) => {
   return (
     <div className={cn(className)}>
-      <p className="text-sm font-semibold text-primary">{p1}</p>
-      <p className="text-xs font-normal text-primary/70">{p2}</p>
+      <p className="text-base font-semibold text-primary">{p1}</p>
+      <p className="text-sm font-normal text-primary/70">{p2}</p>
     </div>
   );
 };
 
 const FlightCard: FC<Props> = ({ sI, totalPriceList }) => {
-  // console.log(totalPriceList)
   return (
-    <div className="mb-4 grid grid-cols-12 gap-x-3 rounded bg-background p-4 shadow">
-      <div className="col-span-2 flex items-center gap-x-2">
+    <div className="mb-4 grid grid-cols-12 gap-3 rounded bg-background p-4 shadow">
+      <div className="col-span-12 flex items-center gap-x-2 md:col-span-2">
         <Image
           src={`https://www.onlinesavaari.com/static/flight/airline_logo/${sI.fD.aI.code}.png`}
           width={50}
@@ -42,25 +41,25 @@ const FlightCard: FC<Props> = ({ sI, totalPriceList }) => {
       <Details
         p1={new Date(sI.dt).toDateString()}
         p2={sI.da.name}
-        className="col-span-3"
+        className="col-span-6 md:col-span-3"
       />
       <Details
         p1={new Date(sI.at).toDateString()}
         p2={sI.aa.name}
-        className="col-span-3"
+        className="col-span-6 md:col-span-3"
       />
       <Details
         p1={convertMinutesToHours(sI.duration)}
         p2={`${sI.stops} Stop`}
-        className="col-span-1"
+        className="col-span-6 md:col-span-1"
       />
-      <div className="col-span-2 inline-flex items-center">
+      <div className="col-span-6 inline-flex items-center md:col-span-2">
         <span>
           <FaIndianRupeeSign className="h-3 w-3" />
         </span>
         <Details p1={totalPriceList.fd.ADULT.fC.TF} />
       </div>
-      <Button variant="destructive" className="col-span-1">
+      <Button variant="destructive" className="col-span-12 md:col-span-1">
         View Fares
       </Button>
     </div>
